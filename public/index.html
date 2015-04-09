@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>Pilla File Browser</title>
+
+		<link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script src="js/jquery.mobile-1.4.5.min.js"></script>
+		<script src="app.js"></script>
+
+		<!--
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+		<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+		-->
+
+	</head>
+
+	<body>
+
+		<div id="popup-yn-page" data-theme="a">
+			<!-- This popup has its theme explicitly defined via data-theme="a"
+			because it has no parent from which to automatically inherit
+			its theme -->
+			<div data-role="header">
+				<h1> Delete Page? </h1>
+			</div>
+			<div role="main" class="ui-content">
+				<h3> Are you sure to xxxx</h3>
+				<p>The action can't be undone.</p>
+				<a href="#" class="ui-btn ui-thn-inline" data-rel="back" data-transition="flow">Yes</a>
+				<a href="#" class="ui-btn ui-thn-inline" data-rel="back">No</a>
+			</div>
+		</div>
+
+		<div data-role="page" id="mainPage">
+			<div data-role="header">
+				<h1>Pilla File Browser</h1>
+				<div data-role="navbar">
+					<ul>
+						<li><a href="#" class="ui-btn-active ui-state-persist" id="pilla-b-home" data-icon="home">Home</a></li>
+						<li><a href="#" data-icon="arrow-u">Up</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div data-role="main">
+				<ul data-role="listview" data-inset="true" id="pilla-list-main">
+					<li data-icon="gear"><a href="#"><i class='fa fa-folder'></i>&nbsp;Folder</a><a href="#itemPage">test</a></li>
+					<li data-icon="gear"><a href="#"><i class='fa fa-file-image-o'></i>&nbsp;Unselected File</a><a href="#itemPage">test</a></li>
+					<li data-icon="gear" data-theme="b"><a href="#"><i class='fa fa-file-image-o'></i>&nbsp;Selected File</a><a href="#itemPage">test</a></li>
+				</ul>
+			</div>
+
+			<div data-role="footer" data-position="fixed" class="ui-btn">
+				<a href="#treePage" data-role="button">Move</a>
+				<a href="#treePage" data-role="button">Copy</a>
+				<a href="#popup-yn-page" data-rel="popup" data-role="button" data-position-to="window">Delete</a>
+			</div> 
+		</div> 
+
+		<div data-role="page" id="itemPage">
+			<div data-role="header">
+				<h1>TODO: FileName</h1>
+			</div>
+
+			<div data-role="main" class="ui-content">
+				<p> TODO: Item Infomation Here </p> 
+				<a href="#treePage" data-role="button">Move</a>
+				<a href="#treePage" data-role="button">Copy</a>
+				<a href="#" data-role="button">Delete</a>
+				<a href="#" data-role="button" data-rel="back">Cancel</a>
+			</div>
+		</div> 
+
+		<div data-role="page" id="treePage">
+			<div data-role="header">
+				<h1>TODO: Current Path</h1>
+				<div data-role="navbar">
+					<ul>
+						<li><a href="#" class="ui-btn-active ui-state-persist" data-icon="home">Home</a></li>
+						<li><a href="#" data-icon="arrow-u">Up</a></li>
+						<li><a href="#" data-icon="check">Here</a></li>
+						<li><a href="#" data-icon="back" data-rel="back">Cancel</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div data-role="main" class="ui-content">
+				<ul data-role="listview" data-inset="true">
+					<li data-icon="carat-r"><a href="#"><i class='fa fa-folder'></i>&nbsp;Folder1<span class="ui-li-count">2</span></a><a href="#">test</a></li>
+					<li data-icon="false"><a href="#"><i class='fa fa-folder'></i>&nbsp;Folder2</a></li>
+					<li data-icon="carat-r" data-theme="b"><a href="#"><i class='fa fa-folder'></i>&nbsp;Selected Folder3<span class="ui-li-count">3</span></a><a href="#">test</a></li>
+				</ul>
+			</div>
+		</div>
+
+	</body>
+
+</html>
