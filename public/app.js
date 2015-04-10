@@ -50,18 +50,34 @@
 	var currentPath = null;
 
 	$( function() {
-		$( "#popup-yn-page" ).enhanceWithin().popup();
+		$( "#popup_yn_page" ).enhanceWithin().popup();
 	});
 
 	$(document).ready(function(){
-		$("#pilla-b-home").on("click", function(e){
+		$(".pilla_btn_home").on("click", function(e){
 			$.get("/files",function(data,status){
-				alert(data.length);
+				$("#pilla_list_main").empty();
 				for(i = 0; i < data.length; i++) {
-					//alert(data[i].Name);
-					$("#pilla-list-main").append('<li data-icon="gear"><a href="#"><i class="fa fa-folder"></i>&nbsp;' + data[i].Name + '</a><a href="#itemPage">test</a></li>');
+					var iconName;
+					var dataIcon;
+					if (data[i].IsDirectory) {
+						iconName = "fa-folder";
+						dataIcon = "carat-r";
+					} else {
+						iconName = getFileIcon(data.Ext);
+						dataIcon = "gear";
+					}
+					var liEntry = $('<li data-icon="' + dataIcon + '">').html('<a href="#"><i class="fa ' + iconName + '"></i>&nbsp;' + data[i].Name + '</a><a href="#itemPage">test</a>');
+					if (data[i].IsDirectory) {
+						$(liEntry).on("click", function(e){
+							//$(this).attr("data-theme", "b");
+							//$("#pilla_list_main").listview('refresh');
+							alert("hello");
+						});
+					}
+					$("#pilla_list_main").append(liEntry);
 				}
-				$("#pilla-list-main").listview('refresh');
+				$("#pilla_list_main").listview('refresh');
 			});
 		});
 	});
@@ -96,18 +112,6 @@
 			"orderable": false,
 			"className": "t-cell-check",
 			"defaultContent": "<input type='checkbox' class='t-chk-item' value=''>"
-		},
-		{
-			"targets": 1,
-			"data": null,
-			"className": "t-cell-file",
-			"render": function(data, type, row, meta) {
-				if (data.IsDirectory) {
-					return "<a href='#'><i class='fa fa-folder'></i>&nbsp;" + data.Name + "</a>";
-				} else {
-					return "<a href='/" + data.Path + "' target='_blank'><i class='fa " + getFileIcon(data.Ext) + "'></i>&nbsp;" + data.Name + "</a>";
-				}
-			}
 		},
 		{
 			"targets": 2,
