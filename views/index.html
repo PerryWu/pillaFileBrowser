@@ -28,30 +28,42 @@
 		<div data-role="page" id="pageone">
 			<div data-role="header">
 				<h1>Welcome To My Homepage</h1>
+				<div data-role="navbar">
+					<ul>
+						<li><a href="#" class="ui-btn-active ui-state-persist" data-icon="home">Home</a></li>
+						<li><a href="#pagetwo" data-icon="arrow-r">Page Two</a></li>
+					</ul>
+				</div>
 			</div>
 
 			<div data-role="main" class="ui-content">
-				<p>Welcome!</p>
-				<a href="#pagetwo">Go to Dialog Page</a>
+				<p>With the ui-btn-active class, notice that the Home button stays highlighted (selected).</p>
+				<p>Click on the Page Two button to see what happens.</p>
 			</div>
 
 			<div data-role="footer" data-position="fixed">
-				<h1>Footer Text</h1>
-			</div>
+				<h1>My Footer</h1>
+			</div> 
 		</div> 
 
-		<div data-role="page" data-dialog="true" id="pagetwo">
+		<div data-role="page" id="pagetwo">
 			<div data-role="header">
-				<h1>I'm A Dialog Box!</h1>
+				<h1>Welcome To My Homepage</h1>
+				<div data-role="navbar">
+					<ul>
+						<li><a href="#pageone" data-icon="home">Home</a></li>
+						<li><a href="#" class="ui-btn-active ui-state-persist" data-icon="arrow-r">Page Two</a></li>
+					</ul>
+				</div>
 			</div>
 
 			<div data-role="main" class="ui-content">
-				<p>The dialog box is different from a normal page, it is displayed on top of the current page and it will not span the entire width of the page. The dialog has also an icon of "X" in the header to close the box.</p>
-				<a href="#pageone">Go to Page One</a>
+				<p>This page will also have its button highlighted, because of the ui-btn-active class.</p> 
+				<p>And if you go back to the "Home" page, you will notice that the state of that page will continue to exist, and vice versa DUE TO THE CLASS UI-STATE-PERSIST!</p>
 			</div>
 
-			<div data-role="footer">
-				<h1>Footer Text In Dialog</h1>
+			<div data-role="footer" data-position="fixed">
+				<h1>My Footer</h1>
 			</div>
 		</div> 
 
