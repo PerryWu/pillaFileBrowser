@@ -62,19 +62,22 @@
 					var dataIcon;
 					if (data[i].IsDirectory) {
 						iconName = "fa-folder";
+						//iconName = "fa-square-o";
 						dataIcon = "carat-r";
 					} else {
 						iconName = getFileIcon(data.Ext);
 						dataIcon = "gear";
 					}
-					var liEntry = $('<li data-icon="' + dataIcon + '">').html('<a href="#"><i class="fa ' + iconName + '"></i>&nbsp;' + data[i].Name + '</a><a href="#itemPage">test</a>');
-					if (data[i].IsDirectory) {
-						$(liEntry).on("click", function(e){
-							//$(this).attr("data-theme", "b");
-							//$("#pilla_list_main").listview('refresh');
-							alert("hello");
-						});
-					}
+					var liEntry = $('<li data-icon="' + dataIcon + '">').html('<a href="#"><i class="fa fa-square-o"></i>&nbsp;&nbsp;<i class="fa ' + iconName + '"></i>&nbsp;&nbsp;' + data[i].Name + '</a><a href="#itemPage">link</a>');
+
+					$(liEntry).on("click", function(e){
+						var fontClass = $(this).find("i:first");
+						if($(fontClass).hasClass("fa-square-o")) {
+							$(fontClass).removeClass("fa-square-o").addClass("fa-check-square-o");
+						} else {
+							$(fontClass).removeClass("fa-check-square-o").addClass("fa-square-o");
+						}
+					});
 					$("#pilla_list_main").append(liEntry);
 				}
 				$("#pilla_list_main").listview('refresh');
