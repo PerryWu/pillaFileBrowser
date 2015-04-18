@@ -47,17 +47,39 @@
 		return (ext && extensionsMap[ext.toLowerCase()]) || 'fa-file-o';
 	}
 
-	var currentPath = null;
+	var currentMainPath = "";
+	var currentTreePath = "";
 	var currentItem = null;
 	var currentSelectedItems = {};
+	var actReq = {srcFiles: [], toPath: "", action: ""};
 
 	$(function() {
-		$( "#popup_yn_page" ).enhanceWithin().popup();
+		$( "#popupYnPage" ).enhanceWithin().popup();
 	});
 
-	function pillaUpdateMainList(items) {
-		$("#pilla_list_main").empty();
+	//
+	// Take action
+	//
+	function pillaActionRequest() {
+		actReq.srcFiles = [];
+		if(currentItem) {
+			actReq.srcFiles.push(currentItem.Path);
+		} else {
+			var itemList = Object.keys(currentSelectedItems);
+			for(var i=0; i < itemList.length; i++)
+				actReq.srcFiles.push(currentMainPath + "/" + itemList[i]);
+		}
+		console.log(actReq);
+	};
+
+	//
+	// Main Page: to update list by given items
+	// 
+	function pillaUpdateMainList(path, items) {
+		$("#pilla_main_list").empty();
+		$("#mainPagePath").text("Path: " + path + "/");
 		currentSelectedItems = {};
+		currentItem = null;
 		for(i = 0; i < items.length; i++) {
 			var iconName;
 			var dataIcon;
@@ -85,17 +107,16 @@
 
 			if(items[i].IsDirectory) {
 				(function (selector, item) {
-					var path = item.Path;
+					var itemPath = item.Path;
 					$(selector).children("a:nth-child(2)").on("click", function(e) {
-						$.get('/files?path=' + path).then(function(data) {
-							pillaUpdateMainList(data);
-							currentPath = path;
+						$.get('/files?path=' + itemPath).then(function(data) {
+							pillaUpdateMainList(itemPath, data);
+							currentMainPath = itemPath;
 						});
 					});
 				})(liEntry, items[i]);
 			} else {
 				(function (selector, item) {
-					var path = item.Path;
 					var thisItem = item;
 					$(selector).children("a:nth-child(2)").on("click", function(e) {
 						pillaUpdateItemInfo(thisItem);
@@ -103,158 +124,157 @@
 				})(liEntry, items[i]);
 			}
 
-			$("#pilla_list_main").append(liEntry);
+			$("#pilla_main_list").append(liEntry);
 		}
-		$("#pilla_list_main").listview('refresh');
+		$("#pilla_main_list").listview('refresh');
 	}
 
+	//
+	// Item Page: to update list by given item
+	//
 	function pillaUpdateItemInfo(item) {
 		currentItem = item;
-		$("#itemPageHeader").text(item.Name);
-		$("#itemPageContent").html("<h2> File path :" + item.Path + "</h2><h2> File size :" + humanFileSize(item.fileSize) + "</h2><h2> Last modified time : XXXXXX </h2>");
+		$("#itemPageHeaderMsg").text(item.Name);
+		$("#itemPageContentMsg").html("<h3> File path :" + item.Path + "</h3><h3> File size :" + humanFileSize(item.fileSize) + "</h3><h3> Last modified time :" + item.MTime + "</h3>");
+	}
+
+	//
+	// Tree page: to update list by given items
+	//
+	function pillaUpdateTreeList(path, items) {
+		$("#pilla_tree_list").empty();
+		$("#treePagePathMsg").text("To: " + path + "/");
+		for(i = 0; i < items.length; i++) {
+			var liEntry;
+			if(items[i].FolderCount > 0) {
+				liEntry = $('<li data-icon="carat-r">').html('<a href="#"><i class="fa fa-folder"></i>&nbsp;&nbsp;' + items[i].Name + '<span class="ui-li-count">' + items[i].FolderCount + '</span></a>');
+			} else {
+				liEntry = $('<li data-icon="false">').html('<a href="#"><i class="fa fa-folder"></i>&nbsp;&nbsp;' + items[i].Name + '</a>');
+
+			}
+
+			if(items[i].FolderCount > 0) { 
+				(function (selector, item) {
+					var itemPath = item.Path;
+					$(selector).children("a").on("click", function(e) {
+						$.get('/folders?path=' + itemPath).then(function(data) {
+							pillaUpdateTreeList(itemPath ,data);
+							currentTreePath = itemPath;
+						});
+					});
+				})(liEntry, items[i]);
+			} else {
+				(function (selector, item) {
+					var itemPath = item.Path;
+					$(selector).children("a").on("click", function(e) {
+						$("#treePagePathMsg").text("To: " + itemPath + "/");
+					});
+				})(liEntry, items[i]);
+			}
+			$("#pilla_tree_list").append(liEntry);
+		}
+		$("#pilla_tree_list").listview('refresh');
 	}
 
 	$(document).ready(function(){
 		// First run, load the list
 		$.get("/files",function(data,status){
-			pillaUpdateMainList(data);
+			pillaUpdateMainList("", data);
 		});
 
-		$(".pilla_btn_home").on("click", function(e){
+		$("#mainPage .pilla_btn_home").on("click", function(e){
 			$.get("/files",function(data,status){
-				pillaUpdateMainList(data);
+				pillaUpdateMainList("", data);
 			});
 		});
 
-		$(".pilla_btn_up").on("click", function(e){
-			if (!currentPath) return;
-			var idx = currentPath.lastIndexOf("/");
-			var path = currentPath.substr(0, idx);
+		$("#mainPage .pilla_btn_up").on("click", function(e){
+			if (!currentMainPath) return;
+			var idx = currentMainPath.lastIndexOf("/");
+			var path = currentMainPath.substr(0, idx);
 			$.get('/files?path=' + path).then(function(data) {
-				pillaUpdateMainList(data);
-				currentPath = path;
+				pillaUpdateMainList(path, data);
+				currentMainPath = path;
 			});
 		});
-		
+
+		$("#treePage .pilla_btn_home").on("click", function(e){
+			$.get("/folders",function(data,status){
+				pillaUpdateTreeList("", data);
+			});
+		});
+
+		$("#treePage .pilla_btn_up").on("click", function(e){
+			if (!currentTreePath) return;
+			var idx = currentTreePath.lastIndexOf("/");
+			var path = currentTreePath.substr(0, idx);
+			$.get('/folders?path=' + path).then(function(data) {
+				pillaUpdateTreeList(path, data);
+				currentTreePath = path;
+			});
+		});
+
+		$("#treePage .pilla_btn_here").on("click", function(e){
+			actReq.toPath = $("#treePagePathMsg").text().slice(4);
+			if (actReq.action === "copy") {
+				$("#ynPageConfirmationMsg").text("Are you sure to copy ?");
+			} else if (actReq.action === "move") {
+				$("#ynPageConfirmationMsg").text("Are you sure to move ?");
+			} else {
+				alert("Unknown action:" + actReq.action);
+				return;
+			}
+		});
+
 		$(".pilla_btn_copy").on("click", function(e){
-			alert(Object.keys(currentSelectedItems));
+			if (currentItem && Object.keys(currentSelectedItems).length == 0) 
+				return;
+			actReq.action = "copy";
+			//alert(Object.keys(currentSelectedItems));
+			$.get("/folders",function(data,status){
+				pillaUpdateTreeList("", data);
+			});
 		});
-		
+
 		$(".pilla_btn_move").on("click", function(e){
-			alert(Object.keys(currentSelectedItems));
+			if (currentItem && Object.keys(currentSelectedItems).length == 0) 
+				return;
+			actReq.action = "move";
+			//alert(Object.keys(currentSelectedItems));
+			$.get("/folders",function(data,status){
+				pillaUpdateTreeList("", data);
+			});
 		});
+
+		$(".pilla_btn_delete").on("click", function(e){
+			if (currentItem && Object.keys(currentSelectedItems).length == 0) 
+				return;
+			actReq.action = "delete";
+			$("#ynPageConfirmationMsg").text("Are you sure to delete ?");
+		});
+
+		$("#pilla_btn_y").on("click", function(e){
+			$("body").addClass('ui-disabled');
+			$.mobile.loading( 'show', {
+				text: "Loading",
+				textVisible: true,
+				theme: "b",
+				textonly: false,
+				html: ""
+			});
+			pillaActionRequest();
+			setTimeout(function() {
+				$.mobile.loading("hide");
+				$("body").removeClass('ui-disabled');
+				$.get("/files",function(data,status){
+					pillaUpdateMainList("", data);
+				});
+				$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
+			}, 5000);
+
+		});
+
 	});
 
-	/*	
-	var options = {
-	"order": [[1, 'asc']],
-	"searching": false,
-	"processing": true,
-	"serverSide": false,
-	"paging": false,
-	"autoWidth": true,
-	//"scrollY":"400px",
-	"dom": '<"toolbar">frtip',
-	"createdRow": function(row, data, dataIndex) {
-	if (!data.IsDirectory) return;
-	var path = data.Path;
-	console.log(path);
-	$(row).on("click", "a", function(e) {
-	$.get('/files?path=' + path).then(function(fData) {
-	table.api().clear();
-	table.api().rows.add(fData).draw();
-	currentPath = path;
-	});
-	e.preventDefault();
-	});
-
-	},
-
-	$("#h-chk-items").on("click", function(e) {
-	var allRow$ = $("#fileTable tbody input.t-chk-item");
-	if ($(this).is(':checked')) {
-	console.log("checked");
-	allRow$.each(function() {
-	$(this).prop("checked", "checked");
-	});
-	table.api().draw();
-	} else {
-	console.log("no check");
-	allRow$.each(function() {
-	$(this).removeProp("checked", "checked");
-	});
-	table.api().draw();
-	}
-	});
-
-	$("#h-btn-copy").on("click", function(e) {
-	var selectedRow$ = $("#fileTable tbody input.t-chk-item:checked");
-	var count = 0;
-	selectedRow$.each(function() {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-	console.log("copy " + count + "th data: " + data.Name);
-	count++;
-	});
-	});
-
-	$("#h-btn-move").on("click", function(e) {
-	var selectedRow$ = $("#fileTable tbody input.t-chk-item:checked");
-	var count = 0;
-	selectedRow$.each(function() {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-	console.log("move " + count + "th data: " + data.Name);
-	count++;
-	});
-	});
-
-	$("#h-btn-delete").on("click", function(e) {
-	var selectedRow$ = $("#fileTable tbody input.t-chk-item:checked");
-	var count = 0;
-	selectedRow$.each(function() {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-	console.log("delete " + count + "th data: " + data.Name);
-	count++;
-	});
-	});
-
-	// Request from table to do individual file action
-	$("#fileTable tbody").on("click", ".t-btn-info", function(e) {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-
-	console.log("info: " + data.Name);
-	});
-
-	$("#fileTable tbody").on("click", ".t-btn-del", function(e) {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-
-	console.log("del: " + data.Name);
-	});
-
-	$("#fileTable tbody").on("click", ".t-btn-move", function(e) {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-
-	console.log("move: " + data.Name);
-	});
-
-	$("#fileTable tbody").on("click", ".t-btn-copy", function(e) {
-	var td = $(this).closest('tr').children('td').next();
-	var cell = table.api().cell(td);
-	var data = cell.data();
-
-	console.log("copy: " + data.Name);
-	});
-	*/
 })(jQuery);
 

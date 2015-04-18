@@ -27,21 +27,23 @@
 
 	<body>
 
-		<div id="popup_yn_page" data-theme="a">
+		<!-- Y/N Popup page -->
+		<div id="popupYnPage" data-theme="a">
 			<!-- This popup has its theme explicitly defined via data-theme="a"
 			because it has no parent from which to automatically inherit
 			its theme -->
 			<div data-role="header">
-				<h1> Delete Page? </h1>
+				<h1>Confirmation </h1>
 			</div>
 			<div role="main" class="ui-content">
-				<h3> Are you sure to xxxx</h3>
+				<h3 id="ynPageConfirmationMsg"> Are you sure to xxxx</h3>
 				<p>The action can't be undone.</p>
-				<a href="#" class="ui-btn ui-thn-inline" data-rel="back" data-transition="flow">Yes</a>
-				<a href="#" class="ui-btn ui-thn-inline" data-rel="back">No</a>
+				<a href="#" id="pilla_btn_y" class="ui-btn" data-transition="flow">Yes</a>
+				<a href="#" id="pilla_btn_n" class="ui-btn" data-rel="back">No</a>
 			</div>
 		</div>
 
+		<!-- Main page -->
 		<div data-role="page" id="mainPage">
 			<div data-role="header">
 				<h1>Pilla File Browser</h1>
@@ -54,35 +56,38 @@
 			</div>
 
 			<div data-role="main">
-				<ul data-role="listview" data-inset="true" id="pilla_list_main" data-theme="a">
+				<h3 id="mainPagePath" style="word-wrap: break-word !important"></h3>
+				<ul data-role="listview" data-inset="true" id="pilla_main_list" data-theme="a">
 				</ul>
 			</div>
 
 			<div data-role="footer" data-position="fixed" class="ui-btn">
 				<a href="#treePage" class="pilla_btn_move" data-role="button">Move</a>
 				<a href="#treePage" class="pilla_btn_copy" data-role="button">Copy</a>
-				<a href="#popup_yn_page" data-rel="popup" data-role="button" data-position-to="window">Delete</a>
+				<a href="#popupYnPage" class="pilla_btn_delete" data-rel="popup" data-role="button" data-position-to="window">Delete</a>
 			</div> 
 		</div> 
 
+		<!-- Item page -->
 		<div data-role="page" id="itemPage">
 			<div data-role="header">
-				<h1 id="itemPageHeader">TODO: FileName</h1>
+				<h1 id="itemPageHeaderMsg"></h1>
 			</div>
 
 			<div data-role="main" class="ui-content">
-				<div id="itemPageContent">
+				<div id="itemPageContentMsg">
 					<h3> File path: XXXX/XXX/XXX </h3>
 					<h3> File size: XXXX </h3>
 					<h3> Last modified time: XXXX </h3>
 				</div>
 				<a href="#treePage" class="pilla_btn_move" data-role="button">Move</a>
 				<a href="#treePage" class="pilla_btn_copy" data-role="button">Copy</a>
-				<a href="#popup_yn_page" data-role="button">Delete</a>
+				<a href="#popupYnPage" class="pilla_btn_delete" data-rel="popup" data-role="button" data-position-to="window">Delete</a>
 				<a href="#" data-role="button" data-rel="back">Cancel</a>
 			</div>
 		</div> 
 
+		<!-- Tree page -->
 		<div data-role="page" id="treePage">
 			<div data-role="header">
 				<h1>Path Selection</h1>
@@ -90,18 +95,15 @@
 					<ul>
 						<li><a href="#" class="pilla_btn_home" data-icon="home">Home</a></li>
 						<li><a href="#" class="pilla_btn_up" data-icon="arrow-u">Up</a></li>
-						<li><a href="#" class="pilla_btn_here" data-icon="check">Here</a></li>
+						<li><a href="#popupYnPage" class="pilla_btn_here" data-rel="popup" data-icon="check" data-position-to="window">Here</a></li>
 						<li><a href="#" data-icon="back" data-rel="back">Cancel</a></li>
 					</ul>
 				</div>
 			</div>
 
 			<div data-role="main" class="ui-content">
-				<h3 style="word-wrap: break-word !important">sdsdfsdfk;dsjhglkdfsjghlksfdjghlkfdjghlfdksjghfdksljghfd</h3>
-				<ul data-role="listview" data-inset="true">
-					<li data-icon="carat-r"><a href="#"><i class='fa fa-folder'></i>&nbsp;Folder1<span class="ui-li-count">2</span></a><a href="#">test</a></li>
-					<li data-icon="false"><a href="#"><i class='fa fa-folder'></i>&nbsp;Folder2</a></li>
-					<li data-icon="carat-r" data-theme="b"><a href="#"><i class='fa fa-folder'></i>&nbsp;Selected Folder3<span class="ui-li-count">3</span></a><a href="#">test</a></li>
+				<h3 id="treePagePathMsg" style="word-wrap: break-word !important"></h3>
+				<ul data-role="listview" data-inset="true" id="pilla_tree_list">
 				</ul>
 			</div>
 		</div>

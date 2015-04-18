@@ -23,6 +23,10 @@ var async = require('async');
 
 var dir = process.cwd();
 
+var fileList = require('./lib/fileList');
+
+fileList.dir(dir);
+
 //swig.setDefaults({ cache: false });
 //app.engine('html', swig.renderFile);
 
@@ -56,66 +60,9 @@ app.get('/test.html', function(req, res){
 	res.redirect('test.html');
 });
 
-app.get('/files', function(req, res) {
-	var currentDir = dir;
-	var query = req.query.path || '';
-	if (query) currentDir = path.join(dir, query);
-	console.log("browsing ", currentDir);
 
-	fs.readdir(currentDir, function(err, files) {
-		if (err) {
-			throw err;
-		}
-		var data = [];
-		var fileList = [];
-
-		files.filter(function(file) {
-			return true;
-		}).forEach(function(file) {
-			fileList.push({
-				file: file,
-				filePath: path.join(currentDir, file),
-				urlPath: path.join(query, file)
-			});
-		});
-
-		//console.log(fileList);
-		async.map(fileList, function(fileObj, cb) {
-			fs.stat(fileObj.filePath, cb);
-		},
-		function(err, results) {
-			if (err) {
-				console.log(err);
-				res.end("Error occurs");
-				return;
-			}
-			for (i = 0; i < results.length; i++) {
-				console.log("processing " + fileList[i].filePath + " " +
-				/*util.inspect(results[i]) +*/
-				" isDic :" + results[i].isDirectory());
-				if (results[i].isDirectory()) {
-					data.push({
-						Name: fileList[i].file,
-						IsDirectory: true,
-						Path: fileList[i].urlPath,
-						fileSize: results[i].size
-					});
-				} else {
-					var ext = path.extname(fileList[i].filePath);
-					data.push({
-						Name: fileList[i].file,
-						Ext: ext,
-						IsDirectory: false,
-						Path: fileList[i].urlPath,
-						fileSize: results[i].size
-					});
-				}
-			}
-			//data = _.sortBy(data, function(f) { return f.Name });
-			res.json(data);
-		});
-	});
-});
+app.get('/files', fileList.getFileList);
+app.get('/folders', fileList.getFolderList);
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log('Express server listening on port ' + app.get('port'));
