@@ -60,7 +60,7 @@
 	//
 	// Take action
 	//
-	function pillaActionRequest() {
+	function ajaxReqAction() {
 		actReq.srcFiles = [];
 		if(currentItem) {
 			actReq.srcFiles.push(currentItem.Path);
@@ -69,8 +69,41 @@
 			for(var i=0; i < itemList.length; i++)
 				actReq.srcFiles.push(currentMainPath + "/" + itemList[i]);
 		}
-		console.log(actReq);
+		//console.log(actReq);
+		//console.log($.param(actReq));
+		//console.log(sentData);
+		$.ajax( {
+			url: '/files',
+			method: 'POST',
+			data: JSON.stringify(actReq),
+			//processData: false,
+			contentType: "application/json",
+			//dataType: 'json',
+			timeout: 10000})
+		.done(function(data) {
+			$.mobile.loading("hide");
+			$("body").removeClass('ui-disabled');
+			$.get("/files",function(data,status){
+				pillaUpdateMainList("", data);
+			});
+			$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
+			console.log("done callback. data:" + data);})
+		.fail(function(jqXHR, textStatus) {
+			$.mobile.loading("hide");
+			$("body").removeClass('ui-disabled');
+			$.get("/files",function(data,status){
+				pillaUpdateMainList("", data);
+			});
+			$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
+			console.log("fail callback. xhr:" + textStatus);
+			console.log(jqXHR);
+		});
 	};
+
+	function ajaxReqFileList(urlPath) {
+
+
+	}
 
 	//
 	// Main Page: to update list by given items
@@ -262,16 +295,8 @@
 				textonly: false,
 				html: ""
 			});
-			pillaActionRequest();
-			setTimeout(function() {
-				$.mobile.loading("hide");
-				$("body").removeClass('ui-disabled');
-				$.get("/files",function(data,status){
-					pillaUpdateMainList("", data);
-				});
-				$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
-			}, 5000);
-
+			ajaxReqAction();
+			//setTimeout(function() {}, 5000);
 		});
 
 	});

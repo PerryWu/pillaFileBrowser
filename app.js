@@ -39,6 +39,7 @@ app.use(logger(':method :url'));
 app.use(methodOverride('_method'));
 app.use(cookieParser('my secret here'));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(session({
 	resave: false, // don't save session if unmodified
 	saveUninitialized: false, // don't create session until something stored
@@ -62,6 +63,15 @@ app.get('/test.html', function(req, res){
 
 
 app.get('/files', fileList.getFileList);
+app.post('/files', function(req, res) {
+	console.log(req.body);
+	console.log(req.body.srcFiles);
+	res.send("{'status':'success','message':'done'}");
+// 	setTimeout(function(){
+//			console.log("end with good");
+//			res.send("{'status':'success','message':'done'}");
+//		}, 3000);
+});
 app.get('/folders', fileList.getFolderList);
 
 http.createServer(app).listen(app.get('port'), function(){
