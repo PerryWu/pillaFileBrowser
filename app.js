@@ -63,7 +63,6 @@ app.get('/folders', fileList.getFolderList);
 
 // development only
 if ('development' == app.get('env')) {
-	//app.use(express.errorHandler());
 	app.use(errorhandler());
 }
 

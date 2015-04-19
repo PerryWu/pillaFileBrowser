@@ -100,8 +100,12 @@
 			actReq.srcFiles.push(currentItem.Path);
 		} else {
 			var itemList = Object.keys(currentSelectedItems);
-			for(var i=0; i < itemList.length; i++)
-				actReq.srcFiles.push(currentMainPath + "/" + itemList[i]);
+			for(var i=0; i < itemList.length; i++) {
+				if(currentMainPath.length != 0)
+					actReq.srcFiles.push(currentMainPath + "/" + itemList[i]);
+				else
+					actReq.srcFiles.push(itemList[i]);
+			}
 		}
 		showLoading();
 		$.ajax( {
