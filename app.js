@@ -21,7 +21,8 @@ var fs = require('fs');
 var util = require('util');
 var async = require('async');
 
-var dir = process.cwd();
+//var dir = process.cwd();
+var dir = process.argv[2] || "/workspace/sandbox";
 
 var fileList = require('./lib/fileList');
 
@@ -57,20 +58,11 @@ app.get('/test.html', function(req, res){
 
 
 app.get('/files', fileList.getFileList);
-app.post('/files', function(req, res) {
-	console.log(req.body);
-	console.log(req.body.srcFiles);
-	res.send("{'status':'success','message':'done'}");
-// 	setTimeout(function(){
-//			console.log("end with good");
-//			res.send("{'status':'success','message':'done'}");
-//		}, 3000);
-});
+app.post('/files', fileList.actFiles);
 app.get('/folders', fileList.getFolderList);
 
 // development only
 if ('development' == app.get('env')) {
-	console.log("hit");
 	//app.use(express.errorHandler());
 	app.use(errorhandler());
 }
