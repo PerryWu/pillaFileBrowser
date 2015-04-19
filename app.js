@@ -47,12 +47,6 @@ app.use(session({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// development only
-if ('development' == app.get('env')) {
-	//app.use(express.errorHandler());
-	app.use(errorhandler());
-}
-
 app.get('/', function(req, res){
 	res.redirect('index.html');
 });
@@ -73,6 +67,13 @@ app.post('/files', function(req, res) {
 //		}, 3000);
 });
 app.get('/folders', fileList.getFolderList);
+
+// development only
+if ('development' == app.get('env')) {
+	console.log("hit");
+	//app.use(express.errorHandler());
+	app.use(errorhandler());
+}
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log('Express server listening on port ' + app.get('port'));

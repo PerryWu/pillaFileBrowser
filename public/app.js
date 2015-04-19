@@ -58,7 +58,41 @@
 	});
 
 	//
-	// Take action
+	// Loading
+	//
+	function showLoading() {
+		$("body").addClass('ui-disabled');
+		$.mobile.loading( 'show', {
+			text: "Loading",
+			textVisible: true,
+			theme: "b",
+			textonly: false,
+			html: ""
+		});
+	}
+
+	function hideLoading() {
+		$.mobile.loading("hide");
+		$("body").removeClass('ui-disabled');
+	}
+
+	//
+	// Y/N Page works
+	//
+	function emptyYnSelection() {
+		$("#ynPageConfirmationMsg").text("Please select files");
+		$("#pilla_btn_y").hide();
+		$("#pilla_btn_n").text("Back");
+	}
+
+	function updateYnMsg(msg) {
+		$("#ynPageConfirmationMsg").text(msg);
+		$("#pilla_btn_y").show();
+		$("#pilla_btn_n").text("No");
+	}
+
+	//
+	// Ajax Actions
 	//
 	function ajaxReqAction() {
 		actReq.srcFiles = [];
@@ -72,6 +106,7 @@
 		//console.log(actReq);
 		//console.log($.param(actReq));
 		//console.log(sentData);
+		showLoading();
 		$.ajax( {
 			url: '/files',
 			method: 'POST',
@@ -79,31 +114,70 @@
 			//processData: false,
 			contentType: "application/json",
 			//dataType: 'json',
-			timeout: 10000})
+		timeout: 10000})
 		.done(function(data) {
-			$.mobile.loading("hide");
-			$("body").removeClass('ui-disabled');
+			//$.mobile.loading("hide");
+			//$("body").removeClass('ui-disabled');
+			hideLoading();
+			ajaxReqFileList("files", "");
+			/*
 			$.get("/files",function(data,status){
-				pillaUpdateMainList("", data);
+			pillaUpdateMainList("", data);
 			});
+			*/
 			$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
 			console.log("done callback. data:" + data);})
-		.fail(function(jqXHR, textStatus) {
-			$.mobile.loading("hide");
-			$("body").removeClass('ui-disabled');
-			$.get("/files",function(data,status){
+			.fail(function(jqXHR, textStatus) {
+				//$.mobile.loading("hide");
+				//$("body").removeClass('ui-disabled');
+				hideLoading();
+				ajaxReqFileList("files", "");
+				/*
+				$.get("/files",function(data,status){
 				pillaUpdateMainList("", data);
+				});
+				*/
+				$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
+				console.log("fail callback. xhr:" + textStatus);
+				console.log(jqXHR);
 			});
-			$(':mobile-pagecontainer').pagecontainer('change', '#mainPage');
-			console.log("fail callback. xhr:" + textStatus);
-			console.log(jqXHR);
+	};
+
+	function ajaxReqFileList(urlPath, itemPath) {
+		var reqItemPath = itemPath;
+		showLoading();
+		$.ajax( {
+			url: urlPath,
+			method: 'GET',
+		timeout: 10000})
+		.done(function(data) {
+			hideLoading();
+			pillaUpdateMainList(reqItemPath, data);
+			currentMainPath = reqItemPath;
+		})
+		.fail(function(jqXHR, textStatus) {
+			hideLoading();
+			alert("Error occur while accessing (" + itemPath + ") : " + textStatus);
 		});
 	};
 
-	function ajaxReqFileList(urlPath) {
-
-
-	}
+	function ajaxReqFolderList(urlPath, itemPath) {
+		var reqItemPath = itemPath;
+		showLoading();
+		$.ajax( {
+			url: urlPath,
+			method: 'GET',
+		timeout: 10000})
+		.done(function(data) {
+			hideLoading();
+			pillaUpdateTreeList(reqItemPath, data);
+			currentTreePath = reqItemPath;
+		})
+		.fail(function(jqXHR, textStatus) {
+			hideLoading();
+			alert("Error occur while accessing (" + itemPath + ") : " + textStatus);
+		});
+	};
 
 	//
 	// Main Page: to update list by given items
@@ -142,10 +216,13 @@
 				(function (selector, item) {
 					var itemPath = item.Path;
 					$(selector).children("a:nth-child(2)").on("click", function(e) {
+						ajaxReqFileList('/files?path=' + itemPath, itemPath);
+						/*
 						$.get('/files?path=' + itemPath).then(function(data) {
-							pillaUpdateMainList(itemPath, data);
-							currentMainPath = itemPath;
+						pillaUpdateMainList(itemPath, data);
+						currentMainPath = itemPath;
 						});
+						*/
 					});
 				})(liEntry, items[i]);
 			} else {
@@ -190,10 +267,13 @@
 				(function (selector, item) {
 					var itemPath = item.Path;
 					$(selector).children("a").on("click", function(e) {
+						ajaxReqFolderList('/folders?path=' + itemPath, itemPath);
+						/*
 						$.get('/folders?path=' + itemPath).then(function(data) {
-							pillaUpdateTreeList(itemPath ,data);
-							currentTreePath = itemPath;
+						pillaUpdateTreeList(itemPath ,data);
+						currentTreePath = itemPath;
 						});
+						*/
 					});
 				})(liEntry, items[i]);
 			} else {
@@ -211,93 +291,116 @@
 
 	$(document).ready(function(){
 		// First run, load the list
+		ajaxReqFileList("/files", "");
+		//$.get("/files",function(data,status){
+			//	pillaUpdateMainList("", data);
+	//});
+
+	$("#mainPage .pilla_btn_home").on("click", function(e){
+		ajaxReqFileList('/files', "");
+		/*
 		$.get("/files",function(data,status){
-			pillaUpdateMainList("", data);
+		pillaUpdateMainList("", data);
 		});
+		*/
+	});
 
-		$("#mainPage .pilla_btn_home").on("click", function(e){
-			$.get("/files",function(data,status){
-				pillaUpdateMainList("", data);
-			});
+	$("#mainPage .pilla_btn_up").on("click", function(e){
+		if (!currentMainPath) return;
+		var idx = currentMainPath.lastIndexOf("/");
+		var path = currentMainPath.substr(0, idx);
+		ajaxReqFileList('/files?path=' + path, path);
+		/*
+		$.get('/files?path=' + path).then(function(data) {
+		pillaUpdateMainList(path, data);
+		currentMainPath = path;
 		});
+		*/
+	});
 
-		$("#mainPage .pilla_btn_up").on("click", function(e){
-			if (!currentMainPath) return;
-			var idx = currentMainPath.lastIndexOf("/");
-			var path = currentMainPath.substr(0, idx);
-			$.get('/files?path=' + path).then(function(data) {
-				pillaUpdateMainList(path, data);
-				currentMainPath = path;
-			});
+	$("#treePage .pilla_btn_home").on("click", function(e){
+		ajaxReqFolderList('/folders', "");
+		/*
+		$.get("/folders",function(data,status){
+		pillaUpdateTreeList("", data);
 		});
+		*/
+	});
 
-		$("#treePage .pilla_btn_home").on("click", function(e){
-			$.get("/folders",function(data,status){
-				pillaUpdateTreeList("", data);
-			});
+	$("#treePage .pilla_btn_up").on("click", function(e){
+		if (!currentTreePath) return;
+		var idx = currentTreePath.lastIndexOf("/");
+		var path = currentTreePath.substr(0, idx);
+		ajaxReqFolderList('/folders?path=' + path, path);
+		/*
+		$.get('/folders?path=' + path).then(function(data) {
+		pillaUpdateTreeList(path, data);
+		currentTreePath = path;
 		});
+		*/
+		$(':mobile-pagecontainer').pagecontainer('change', '#treePage');
+	});
 
-		$("#treePage .pilla_btn_up").on("click", function(e){
-			if (!currentTreePath) return;
-			var idx = currentTreePath.lastIndexOf("/");
-			var path = currentTreePath.substr(0, idx);
-			$.get('/folders?path=' + path).then(function(data) {
-				pillaUpdateTreeList(path, data);
-				currentTreePath = path;
-			});
-		});
+	$("#treePage .pilla_btn_here").on("click", function(e){
+		actReq.toPath = $("#treePagePathMsg").text().slice(4);
+		if (actReq.action === "copy") {
+			//$("#ynPageConfirmationMsg").text("Are you sure to copy?");
+			updateYnMsg("Are you sure to copy?");
+		} else if (actReq.action === "move") {
+			//$("#ynPageConfirmationMsg").text("Are you sure to move?");
+			updateYnMsg("Are you sure to move?");
+		} else {
+			alert("Unknown action:" + actReq.action);
+			return;
+		}
+	});
 
-		$("#treePage .pilla_btn_here").on("click", function(e){
-			actReq.toPath = $("#treePagePathMsg").text().slice(4);
-			if (actReq.action === "copy") {
-				$("#ynPageConfirmationMsg").text("Are you sure to copy ?");
-			} else if (actReq.action === "move") {
-				$("#ynPageConfirmationMsg").text("Are you sure to move ?");
-			} else {
-				alert("Unknown action:" + actReq.action);
-				return;
-			}
+	$(".pilla_btn_copy").on("click", function(e){
+		if (currentItem == null && Object.keys(currentSelectedItems).length == 0) {
+			emptyYnSelection();
+			return;
+		}
+		actReq.action = "copy";
+		//alert(Object.keys(currentSelectedItems));
+		ajaxReqFolderList('/folders', "");
+		/*
+		$.get("/folders",function(data,status){
+		pillaUpdateTreeList("", data);
 		});
+		*/
+		$(':mobile-pagecontainer').pagecontainer('change', '#treePage');
+	});
 
-		$(".pilla_btn_copy").on("click", function(e){
-			if (currentItem && Object.keys(currentSelectedItems).length == 0) 
-				return;
-			actReq.action = "copy";
-			//alert(Object.keys(currentSelectedItems));
-			$.get("/folders",function(data,status){
-				pillaUpdateTreeList("", data);
-			});
+	$(".pilla_btn_move").on("click", function(e){
+		if (currentItem == null && Object.keys(currentSelectedItems).length == 0) {
+			emptyYnSelection();
+			return;
+		}
+		actReq.action = "move";
+		//alert(Object.keys(currentSelectedItems));
+		ajaxReqFolderList('/folders', "");
+		/*
+		$.get("/folders",function(data,status){
+		pillaUpdateTreeList("", data);
 		});
+		*/
+		$(':mobile-pagecontainer').pagecontainer('change', '#treePage');
+	});
 
-		$(".pilla_btn_move").on("click", function(e){
-			if (currentItem && Object.keys(currentSelectedItems).length == 0) 
-				return;
-			actReq.action = "move";
-			//alert(Object.keys(currentSelectedItems));
-			$.get("/folders",function(data,status){
-				pillaUpdateTreeList("", data);
-			});
-		});
+	$(".pilla_btn_delete").on("click", function(e){
+		if (currentItem == null && Object.keys(currentSelectedItems).length == 0) {
+			emptyYnSelection();
+			return;
+		}
+		actReq.action = "delete";
+		updateYnMsg("Are you sure to delete ?");
+		//$("#ynPageConfirmationMsg").text("Are you sure to delete ?");
+	});
 
-		$(".pilla_btn_delete").on("click", function(e){
-			if (currentItem && Object.keys(currentSelectedItems).length == 0) 
-				return;
-			actReq.action = "delete";
-			$("#ynPageConfirmationMsg").text("Are you sure to delete ?");
-		});
-
-		$("#pilla_btn_y").on("click", function(e){
-			$("body").addClass('ui-disabled');
-			$.mobile.loading( 'show', {
-				text: "Loading",
-				textVisible: true,
-				theme: "b",
-				textonly: false,
-				html: ""
-			});
-			ajaxReqAction();
-			//setTimeout(function() {}, 5000);
-		});
+	$("#pilla_btn_y").on("click", function(e){
+		ajaxReqAction();
+		//setTimeout(function() {}, 5000);
+	});
 
 	});
 
